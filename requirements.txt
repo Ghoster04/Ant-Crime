@@ -1,0 +1,29 @@
+# Framework Web
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Banco de Dados
+sqlalchemy==2.0.23
+
+# Validação de dados
+pydantic[email]==2.5.0
+
+# Autenticação e Segurança
+pyjwt==2.8.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Configurações diretas no código (sem arquivos externos)
+
+# WebSocket para comunicação em tempo real
+websockets==12.0
+
+# Utilitários
+python-dateutil==2.8.2
+
+# Para desenvolvimento
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# SQLite (já incluído no Python)
+# Para PostgreSQL em produção: psycopg2-binary==2.9.9
