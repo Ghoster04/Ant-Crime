@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from typing import List, Optional, Annotated
+from contextlib import asynccontextmanager
 import json
 import os
 import uuid
@@ -28,11 +29,26 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 MAX_FILE_SIZE = settings.MAX_FILE_SIZE
 ALLOWED_EXTENSIONS = settings.ALLOWED_EXTENSIONS
 
+# Lifespan event handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Gerenciar eventos de ciclo de vida da aplicação"""
+    # Startup
+    print("🚀 Iniciando AntiCrime 04 API...")
+    init_db()
+    print("✅ Banco de dados inicializado!")
+    
+    yield
+    
+    # Shutdown
+    print("🛑 Encerrando AntiCrime 04 API...")
+
 # Inicializar FastAPI
 app = FastAPI(
     title="AntiCrime 04 API",
     description="Sistema de Vigilância e Controle de Dispositivos - PRM Moçambique",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # CORS
@@ -142,10 +158,7 @@ def get_current_admin(
         raise credentials_exception
     return admin
 
-# Inicializar banco de dados na inicialização
-@app.on_event("startup")
-async def startup_event():
-    init_db()
+# Banco de dados é inicializado no lifespan handler
 
 # ROTAS DE AUTENTICAÇÃO
 @app.post("/auth/login", response_model=schemas.Token)
