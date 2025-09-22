@@ -4,28 +4,17 @@ from sqlalchemy.orm import DeclarativeBase
 from fastapi import HTTPException
 from config import settings
 
-# Criar engine usando configurações centralizadas com retry
+# Criar engine usando SQLite (mais simples e confiável)
 def create_database_engine():
-    """Criar engine do banco com configurações robustas"""
+    """Criar engine do banco SQLite"""
     try:
-        # Configurações específicas para MySQL
-        mysql_connect_args = {
-            "charset": "utf8mb4",
-            "autocommit": False,
-            "connect_timeout": 10,
-            "read_timeout": 10,
-            "write_timeout": 10,
-        }
+        # Usar SQLite em vez de MySQL
+        sqlite_url = "sqlite:///./anticrime04.db"
         
         engine = create_engine(
-            settings.database_url,
+            sqlite_url,
             echo=settings.DEBUG,
-            connect_args=mysql_connect_args,
-            pool_pre_ping=True,
-            pool_recycle=300,  # Reciclar conexões a cada 5 minutos
-            pool_size=5,       # Pool menor para evitar problemas
-            max_overflow=10,   # Menos conexões extras
-            pool_timeout=30,   # Timeout para conexões
+            connect_args={"check_same_thread": False},  # Para SQLite
         )
         return engine
     except Exception as e:
