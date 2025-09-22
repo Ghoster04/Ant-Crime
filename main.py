@@ -33,15 +33,26 @@ ALLOWED_EXTENSIONS = settings.ALLOWED_EXTENSIONS
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Gerenciar eventos de ciclo de vida da aplicação"""
-    # Startup rápido
+    # Startup
     print("🚀 AntiCrime 04 API iniciando...")
     
-    # Inicializar banco em background (não bloquear)
+    # Inicializar banco de dados
     try:
-        # Não aguardar inicialização do banco
-        print("⚠️ Inicializando banco em background...")
+        from database import init_db, create_superuser
+        print("🗄️ Inicializando banco de dados...")
+        
+        if init_db():
+            print("✅ Banco de dados inicializado!")
+            
+            # Criar super administrador se não existir
+            print("👤 Verificando super administrador...")
+            create_superuser()
+        else:
+            print("⚠️ Banco de dados não pôde ser inicializado")
+            
     except Exception as e:
-        print(f"⚠️ Banco será inicializado sob demanda: {e}")
+        print(f"⚠️ Erro na inicialização: {e}")
+        print("⚠️ Sistema continuará sem banco de dados")
     
     yield
     
@@ -1231,6 +1242,51 @@ def initialize_database():
         return {
             "status": "error",
             "message": f"Erro ao inicializar banco: {str(e)}"
+        }
+
+# ROTA LIVRE PARA CRIAR ADMIN INICIAL
+@app.post("/create-admin")
+def create_initial_admin():
+    """Criar usuário administrador inicial (rota livre - sem autenticação)"""
+    try:
+        from database import create_superuser
+        
+        # Verificar se já existe admin
+        db = SessionLocal()
+        try:
+            existing_admin = db.query(Admin).filter(
+                Admin.tipo_admin == "super_admin"
+            ).first()
+            
+            if existing_admin:
+                return {
+                    "status": "warning",
+                    "message": "Super administrador já existe",
+                    "admin_email": existing_admin.email,
+                    "admin_type": existing_admin.tipo_admin
+                }
+            
+            # Criar super admin
+            create_superuser()
+            
+            return {
+                "status": "success",
+                "message": "Super administrador criado com sucesso",
+                "credentials": {
+                    "email": "admin@prm.gov.mz",
+                    "password": "admin123",
+                    "type": "super_admin"
+                }
+            }
+            
+        finally:
+            db.close()
+            
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Erro ao criar administrador: {str(e)}",
+            "error_type": type(e).__name__
         }
 import uvicorn
 
