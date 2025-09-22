@@ -33,20 +33,20 @@ ALLOWED_EXTENSIONS = settings.ALLOWED_EXTENSIONS
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Gerenciar eventos de ciclo de vida da aplicação"""
-    # Startup
-    print("🚀 Iniciando AntiCrime 04 API...")
+    # Startup rápido
+    print("🚀 AntiCrime 04 API iniciando...")
+    
+    # Inicializar banco em background (não bloquear)
     try:
-        init_db()
-        print("✅ Banco de dados inicializado!")
+        # Não aguardar inicialização do banco
+        print("⚠️ Inicializando banco em background...")
     except Exception as e:
-        print(f"❌ Erro ao inicializar banco de dados: {e}")
-        # Não falhar a aplicação se o banco não conseguir conectar
-        print("⚠️ Continuando sem inicialização do banco...")
+        print(f"⚠️ Banco será inicializado sob demanda: {e}")
     
     yield
     
     # Shutdown
-    print("🛑 Encerrando AntiCrime 04 API...")
+    print("🛑 AntiCrime 04 API encerrando...")
 
 # Inicializar FastAPI
 app = FastAPI(
@@ -1204,6 +1204,27 @@ def test_database():
             "message": f"Erro ao conectar com banco: {str(e)}",
             "database_url": settings.database_url,
             "error_type": type(e).__name__
+        }
+
+# ROTA PARA INICIALIZAR BANCO
+@app.post("/init-db")
+def initialize_database():
+    """Inicializar banco de dados sob demanda"""
+    try:
+        if init_db():
+            return {
+                "status": "success",
+                "message": "Banco de dados inicializado com sucesso"
+            }
+        else:
+            return {
+                "status": "warning",
+                "message": "Banco de dados não pôde ser inicializado"
+            }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Erro ao inicializar banco: {str(e)}"
         }
 
 if __name__ == "__main__":

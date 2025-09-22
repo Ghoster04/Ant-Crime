@@ -7,6 +7,7 @@ import sys
 import time
 import logging
 from pathlib import Path
+from sqlalchemy import text
 
 # Configurar logging
 logging.basicConfig(
@@ -58,10 +59,14 @@ def check_database_connection():
         from config import settings
         logger.info(f"📊 URL do banco: {settings.database_url}")
         
-        # Tentar conectar
+        # Tentar conectar com timeout
         from database import engine
+        if engine is None:
+            logger.warning("⚠️ Engine do banco não disponível, continuando...")
+            return False
+            
         with engine.connect() as conn:
-            result = conn.execute("SELECT 1")
+            result = conn.execute(text("SELECT 1"))
             logger.info("✅ Conexão com banco OK")
             return True
             
