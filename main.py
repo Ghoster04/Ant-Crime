@@ -1152,7 +1152,11 @@ async def websocket_endpoint(websocket: WebSocket):
                 await manager.send_personal_message(json.dumps({"type": "echo", "data": payload}), websocket)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-
+        
+@app.get("/")
+def root():
+    return {"message": "API online 🚀"}
+    
 # ROTA DE SAÚDE
 @app.get("/health")
 def health_check():
