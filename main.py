@@ -1205,7 +1205,9 @@ def test_database():
             "database_url": settings.database_url,
             "error_type": type(e).__name__
         }
-
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 # ROTA PARA INICIALIZAR BANCO
 @app.post("/init-db")
 def initialize_database():
@@ -1227,5 +1229,7 @@ def initialize_database():
             "message": f"Erro ao inicializar banco: {str(e)}"
         }
 import uvicorn
+
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))  # usa a PORT do Railway
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)
