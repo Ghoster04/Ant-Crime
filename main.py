@@ -1226,7 +1226,6 @@ def initialize_database():
             "status": "error",
             "message": f"Erro ao inicializar banco: {str(e)}"
         }
-
+import uvicorn
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))  # Railway injeta PORT
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
