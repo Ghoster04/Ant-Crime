@@ -16,7 +16,7 @@ import jwt
 from passlib.context import CryptContext
 
 # Imports locais
-from database import get_db, init_db
+from database import get_db, init_db, engine
 from models import Admin, Usuario, Dispositivo, Emergencia, LogSistema, PingDispositivo
 import schemas
 
@@ -1157,11 +1157,54 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.get("/health")
 def health_check():
     """Verificar saúde da API"""
+    db_status = "unknown"
+    try:
+        if engine is not None:
+            with engine.connect() as conn:
+                conn.execute("SELECT 1")
+            db_status = "connected"
+        else:
+            db_status = "not_configured"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+    
     return {
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "database": db_status
     }
+
+# ROTA DE TESTE DE BANCO
+@app.get("/test-db")
+def test_database():
+    """Testar conexão com banco de dados"""
+    try:
+        if engine is None:
+            return {
+                "status": "error",
+                "message": "Engine do banco não configurado",
+                "details": "Verifique as configurações de conexão"
+            }
+        
+        with engine.connect() as conn:
+            result = conn.execute("SELECT VERSION() as version")
+            mysql_version = result.fetchone()[0]
+            
+            return {
+                "status": "success",
+                "message": "Conexão com MySQL estabelecida",
+                "mysql_version": mysql_version,
+                "database_url": settings.database_url
+            }
+            
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Erro ao conectar com banco: {str(e)}",
+            "database_url": settings.database_url,
+            "error_type": type(e).__name__
+        }
 
 if __name__ == "__main__":
     import uvicorn

@@ -45,13 +45,17 @@ class Settings:
             # Usar SQLite para desenvolvimento local
             return "sqlite:///./anticrime04.db"
         else:
+            # Sempre usar MySQL em produção
             # Detectar se estamos rodando no Railway ou localmente
             if self._is_railway_environment():
                 # Dentro do Railway: usar mysql.railway.internal
-                return f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}"
+                mysql_url = f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}"
             else:
                 # Desenvolvimento local: usar URL externa do Railway
-                return f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_EXTERNAL_HOST}:{self.MYSQL_EXTERNAL_PORT}/{self.MYSQL_DATABASE}"
+                mysql_url = f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_EXTERNAL_HOST}:{self.MYSQL_EXTERNAL_PORT}/{self.MYSQL_DATABASE}"
+            
+            print(f"🔗 Conectando ao MySQL: {mysql_url}")
+            return mysql_url
     
     def _is_railway_environment(self) -> bool:
         """Detecta se estamos rodando no Railway"""

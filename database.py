@@ -1,21 +1,45 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from fastapi import HTTPException
 from config import settings
 
-# Criar engine usando configurações centralizadas
-engine = create_engine(
-    settings.database_url,
-    echo=settings.DEBUG,
-    connect_args=settings.connect_args,
-    pool_pre_ping=True,
-    pool_recycle=300,  # Reciclar conexões a cada 5 minutos
-    pool_size=10,      # Pool de conexões
-    max_overflow=20    # Conexões extras permitidas
-)
+# Criar engine usando configurações centralizadas com retry
+def create_database_engine():
+    """Criar engine do banco com configurações robustas"""
+    try:
+        # Configurações específicas para MySQL
+        mysql_connect_args = {
+            "charset": "utf8mb4",
+            "autocommit": False,
+            "connect_timeout": 10,
+            "read_timeout": 10,
+            "write_timeout": 10,
+        }
+        
+        engine = create_engine(
+            settings.database_url,
+            echo=settings.DEBUG,
+            connect_args=mysql_connect_args,
+            pool_pre_ping=True,
+            pool_recycle=300,  # Reciclar conexões a cada 5 minutos
+            pool_size=5,       # Pool menor para evitar problemas
+            max_overflow=10,   # Menos conexões extras
+            pool_timeout=30,   # Timeout para conexões
+        )
+        return engine
+    except Exception as e:
+        print(f"⚠️ Erro ao criar engine do banco: {e}")
+        return None
 
-# Criar sessionmaker
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Tentar criar engine, mas não falhar se não conseguir
+engine = create_database_engine()
+
+# Criar sessionmaker apenas se engine estiver disponível
+if engine is not None:
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+else:
+    SessionLocal = None
 
 # Base para os modelos
 Base = declarative_base()
@@ -24,9 +48,21 @@ def get_db():
     """
     Dependency para obter sessão do banco de dados
     """
+    if engine is None or SessionLocal is None:
+        raise HTTPException(
+            status_code=503, 
+            detail="Banco de dados não disponível"
+        )
+    
     db = SessionLocal()
     try:
         yield db
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=503,
+            detail=f"Erro de conexão com banco: {str(e)}"
+        )
     finally:
         db.close()
 
@@ -34,13 +70,19 @@ def init_db():
     """
     Inicializar banco de dados - criar todas as tabelas
     """
+    if engine is None:
+        print("⚠️ Engine do banco não disponível, pulando inicialização...")
+        return False
+    
     try:
         from models import Base
         Base.metadata.create_all(bind=engine)
-        print("Banco de dados inicializado com sucesso!")
+        print("✅ Banco de dados inicializado com sucesso!")
+        return True
     except Exception as e:
-        print(f"Erro ao inicializar banco de dados: {e}")
-        raise
+        print(f"❌ Erro ao inicializar banco de dados: {e}")
+        print("⚠️ Continuando sem inicialização do banco...")
+        return False
 
 def create_superuser():
     """
