@@ -19,16 +19,14 @@ from database import get_db, init_db
 from models import Admin, Usuario, Dispositivo, Emergencia, LogSistema, PingDispositivo
 import schemas
 
-# Configurações diretas no código
-SECRET_KEY = "sua_chave_secreta_muito_segura_aqui_mude_em_producao"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# Importar configurações centralizadas
+from config import settings
 
 # Configurações de upload
-UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR = Path(settings.UPLOAD_DIR)
 UPLOAD_DIR.mkdir(exist_ok=True)
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
-ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
+MAX_FILE_SIZE = settings.MAX_FILE_SIZE
+ALLOWED_EXTENSIONS = settings.ALLOWED_EXTENSIONS
 
 # Inicializar FastAPI
 app = FastAPI(
@@ -117,9 +115,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
 def get_current_admin(
@@ -132,7 +130,7 @@ def get_current_admin(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(credentials.credentials, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         admin_id: int = payload.get("sub")
         if admin_id is None:
             raise credentials_exception
@@ -173,7 +171,7 @@ def login(login_data: schemas.Login, db: Session = Depends(get_db)):
     db.commit()
     
     # Criar token
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": str(admin.id)}, expires_delta=access_token_expires
     )
@@ -1149,4 +1147,4 @@ def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=settings.HOST, port=settings.PORT)

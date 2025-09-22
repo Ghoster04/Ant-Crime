@@ -4,7 +4,8 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
 
-Base = declarative_base()
+# Importar Base do database.py para evitar conflitos
+from database import Base
 
 class StatusEmergencia(enum.Enum):
     ATIVO = "ativo"

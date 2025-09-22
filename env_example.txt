@@ -1,0 +1,58 @@
+# Configurações de Ambiente - AntiCrime 04
+# Copie este arquivo para .env e ajuste conforme necessário
+
+# ===========================================
+# CONFIGURAÇÕES DO BANCO DE DADOS
+# ===========================================
+
+# Para desenvolvimento local com MySQL Railway (externo)
+MYSQL_EXTERNAL_HOST=turntable.proxy.rlwy.net
+MYSQL_EXTERNAL_PORT=28897
+MYSQL_USER=root
+MYSQL_PASSWORD=qmWIuOIpYLNOJcSdpKumbxNcQJPmalAO
+MYSQL_DATABASE=railway
+
+# Para produção (Railway interno)
+MYSQL_HOST=mysql.railway.internal
+MYSQL_PORT=3306
+
+# ===========================================
+# CONFIGURAÇÕES DA APLICAÇÃO
+# ===========================================
+
+# Para usar SQLite localmente (desenvolvimento)
+USE_LOCAL_DB=False
+DEBUG=False
+
+# Para usar MySQL em desenvolvimento local
+# USE_LOCAL_DB=False
+# DEBUG=True
+
+# ===========================================
+# CONFIGURAÇÕES DE SEGURANÇA
+# ===========================================
+
+SECRET_KEY=sua_chave_secreta_muito_segura_aqui_mude_em_producao
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# ===========================================
+# CONFIGURAÇÕES DE UPLOAD
+# ===========================================
+
+MAX_FILE_SIZE=5242880
+UPLOAD_DIR=uploads
+
+# ===========================================
+# CONFIGURAÇÕES DO SERVIDOR
+# ===========================================
+
+HOST=0.0.0.0
+PORT=8000
+
+# ===========================================
+# CONFIGURAÇÕES ESPECÍFICAS DO RAILWAY
+# ===========================================
+
+# Estas variáveis são definidas automaticamente pelo Railway
+# RAILWAY_ENVIRONMENT=production
+# RAILWAY_PROJECT_ID=seu-project-id

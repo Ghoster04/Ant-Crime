@@ -1,23 +1,17 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from config import settings
 
-# Configurações diretas no código
-DATABASE_URL = "sqlite:///./anticrime04.db"
-DEBUG = False
-
-# Configurações específicas para SQLite
-sqlite_connect_args = {
-    "check_same_thread": False,
-    "isolation_level": None,
-}
-
-# Criar engine
+# Criar engine usando configurações centralizadas
 engine = create_engine(
-    DATABASE_URL,
-    echo=DEBUG,
-    connect_args=sqlite_connect_args,
-    pool_pre_ping=True
+    settings.database_url,
+    echo=settings.DEBUG,
+    connect_args=settings.connect_args,
+    pool_pre_ping=True,
+    pool_recycle=300,  # Reciclar conexões a cada 5 minutos
+    pool_size=10,      # Pool de conexões
+    max_overflow=20    # Conexões extras permitidas
 )
 
 # Criar sessionmaker
