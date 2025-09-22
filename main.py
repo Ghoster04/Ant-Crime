@@ -35,8 +35,13 @@ async def lifespan(app: FastAPI):
     """Gerenciar eventos de ciclo de vida da aplicação"""
     # Startup
     print("🚀 Iniciando AntiCrime 04 API...")
-    init_db()
-    print("✅ Banco de dados inicializado!")
+    try:
+        init_db()
+        print("✅ Banco de dados inicializado!")
+    except Exception as e:
+        print(f"❌ Erro ao inicializar banco de dados: {e}")
+        # Não falhar a aplicação se o banco não conseguir conectar
+        print("⚠️ Continuando sem inicialização do banco...")
     
     yield
     

@@ -34,9 +34,13 @@ def init_db():
     """
     Inicializar banco de dados - criar todas as tabelas
     """
-    from models import Base
-    Base.metadata.create_all(bind=engine)
-    print("Banco de dados inicializado com sucesso!")
+    try:
+        from models import Base
+        Base.metadata.create_all(bind=engine)
+        print("Banco de dados inicializado com sucesso!")
+    except Exception as e:
+        print(f"Erro ao inicializar banco de dados: {e}")
+        raise
 
 def create_superuser():
     """

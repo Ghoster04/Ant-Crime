@@ -1,0 +1,57 @@
+# Arquivos para ignorar no deploy Railway
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git/
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+
+# Arquivos de desenvolvimento
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Arquivos de teste
+test_*.py
+*_test.py
+tests/
+
+# Documentação
+*.md
+README.md
+docs/
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Uploads locais (não enviar para produção)
+uploads/
+*.db
+*.sqlite
+*.sqlite3
