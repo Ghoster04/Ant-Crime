@@ -1,27 +1,27 @@
 # Framework Web
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
+fastapi
+uvicorn[standard]
 
 # Banco de Dados
-sqlalchemy==2.0.23
-pymysql==1.1.0
-cryptography==41.0.7
+sqlalchemy
+pymysql
+cryptography
 
 # Validação de dados
-pydantic==2.5.0
-email-validator==2.1.0.post1
+pydantic
+email-validator
 
 # Autenticação e Segurança
-pyjwt==2.8.0
-passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
+pyjwt
+passlib[bcrypt]
+python-multipart
 
 # WebSocket
-websockets==12.0
+websockets
 
 # Utilitários
-python-dateutil==2.8.2
+python-dateutil
 
 # Para desenvolvimento
-pytest==7.4.3
-pytest-asyncio==0.21.1
+pytest
+pytest-asyncio
