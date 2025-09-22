@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
@@ -35,7 +35,8 @@ class AdminBase(BaseModel):
 class AdminCreate(AdminBase):
     senha: str
     
-    @validator('senha')
+    @field_validator('senha')
+    @classmethod
     def validate_senha(cls, v):
         if len(v) < 6:
             raise ValueError('Senha deve ter pelo menos 6 caracteres')
@@ -55,8 +56,7 @@ class AdminResponse(AdminBase):
     data_criacao: datetime
     ultimo_login: Optional[datetime] = None
     
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Schemas para Usuario
 class UsuarioBase(BaseModel):
@@ -78,13 +78,15 @@ class UsuarioBase(BaseModel):
     ativo: bool = True
 
 class UsuarioCreate(UsuarioBase):
-    @validator('latitude_residencia')
+    @field_validator('latitude_residencia')
+    @classmethod
     def validate_latitude(cls, v):
         if not -90 <= v <= 90:
             raise ValueError('Latitude deve estar entre -90 e 90')
         return v
     
-    @validator('longitude_residencia')
+    @field_validator('longitude_residencia')
+    @classmethod
     def validate_longitude(cls, v):
         if not -180 <= v <= 180:
             raise ValueError('Longitude deve estar entre -180 e 180')
@@ -112,8 +114,7 @@ class UsuarioResponse(UsuarioBase):
     data_cadastro: datetime
     admin_cadastrador_id: int
     
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Schemas para Dispositivo
 class DispositivoBase(BaseModel):
@@ -127,7 +128,8 @@ class DispositivoBase(BaseModel):
 class DispositivoCreate(DispositivoBase):
     usuario_id: int
     
-    @validator('imei')
+    @field_validator('imei')
+    @classmethod
     def validate_imei(cls, v):
         if len(v) != 15:
             raise ValueError('IMEI deve ter exatamente 15 dígitos')
@@ -153,8 +155,7 @@ class DispositivoResponse(DispositivoBase):
     ultima_localizacao_lng: Optional[float] = None
     ultimo_ping: Optional[datetime] = None
     
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Schemas para Emergencia
 class EmergenciaBase(BaseModel):
@@ -166,13 +167,15 @@ class EmergenciaBase(BaseModel):
 class EmergenciaCreate(EmergenciaBase):
     dispositivo_id: int
     
-    @validator('latitude')
+    @field_validator('latitude')
+    @classmethod
     def validate_latitude(cls, v):
         if not -90 <= v <= 90:
             raise ValueError('Latitude deve estar entre -90 e 90')
         return v
     
-    @validator('longitude')
+    @field_validator('longitude')
+    @classmethod
     def validate_longitude(cls, v):
         if not -180 <= v <= 180:
             raise ValueError('Longitude deve estar entre -180 e 180')
@@ -195,8 +198,7 @@ class EmergenciaResponse(EmergenciaBase):
     timestamp_finalizacao: Optional[datetime] = None
     observacoes_admin: Optional[str] = None
     
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Schemas para autenticação
 class Login(BaseModel):
